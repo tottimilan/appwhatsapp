@@ -143,6 +143,13 @@
   100% { transform: rotate(360deg); }
 }
 
+.avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
 .empty-state {
   display: flex;
   align-items: center;

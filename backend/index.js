@@ -5,6 +5,7 @@ const { createClient } = require('@supabase/supabase-js');
 const axios = require('axios');
 const http = require('http');
 const socketIo = require('socket.io');
+const { normalizePhoneNumber } = require('./utils/phoneUtils');
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, { cors: { origin: '*' } });
@@ -42,8 +43,8 @@ app.post('/webhook', async (req, res) => {
       if (checkError) console.error('Check error:', checkError);
       if (!existing) {
         const { data, error } = await supabase.from('messages').insert({
-          from_number: msg.from,
-          to_number: change.metadata.phone_number_id,
+          from_number: normalizePhoneNumber(msg.from),
+          to_number: normalizePhoneNumber(change.metadata.phone_number_id),
           message_id: msg.id,
           body: msg.type === 'text' ? msg.text.body : '',
           type: msg.type,
@@ -86,6 +87,30 @@ app.post('/send', async (req, res) => {
     res.json({ success: true, response: response.data });
   } catch (error) {
     console.error('Send error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Endpoint para marcar mensajes como leídos
+app.post('/mark-as-read', async (req, res) => {
+  try {
+    const { contactNumber } = req.body;
+    const myNumber = normalizePhoneNumber('776732452191426');
+    const normalizedContact = normalizePhoneNumber(contactNumber);
+    
+    // Actualizar todos los mensajes recibidos de este contacto como leídos
+    const { error } = await supabase
+      .from('messages')
+      .update({ status: 'read' })
+      .eq('from_number', normalizedContact)
+      .eq('to_number', myNumber)
+      .eq('status', 'received');
+    
+    if (error) throw error;
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error marking messages as read:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });

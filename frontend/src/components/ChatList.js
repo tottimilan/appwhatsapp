@@ -55,11 +55,19 @@ const ChatList = ({ chats, selectedChat, onSelectChat, loading }) => {
               className={`chat-item ${selectedChat?.id === chat.id ? 'selected' : ''}`}
               onClick={() => handleChatClick(chat)}
             >
-              <div className="chat-avatar">
+                          <div className="chat-avatar">
+              {chat.profilePicture ? (
+                <img 
+                  src={chat.profilePicture} 
+                  alt={chat.name}
+                  className="avatar-image"
+                />
+              ) : (
                 <div className="avatar-placeholder">
                   {chat.name.charAt(0).toUpperCase()}
                 </div>
-              </div>
+              )}
+            </div>
               <div className="chat-info">
                 <div className="chat-header">
                   <span className="chat-name">{chat.name}</span>
