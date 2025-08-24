@@ -79,6 +79,45 @@
   gap: 8px;
 }
 
+/* Estados de carga */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: #667781;
+}
+
+.loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #e9edef;
+  border-top: 2px solid #25d366;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.empty-messages {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: #667781;
+  text-align: center;
+}
+
+.empty-messages p {
+  margin: 0;
+  font-size: 14px;
+}
+
 /* Mensajes */
 .message {
   display: flex;
@@ -122,6 +161,15 @@
   font-size: 11px;
   color: #667781;
   text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.message-status {
+  color: #25d366;
+  font-size: 12px;
 }
 
 /* Input de mensaje */
@@ -150,6 +198,12 @@
   resize: none;
   min-height: 20px;
   max-height: 100px;
+}
+
+.message-input:disabled {
+  background-color: #f5f6f6;
+  color: #667781;
+  cursor: not-allowed;
 }
 
 .message-input::placeholder {

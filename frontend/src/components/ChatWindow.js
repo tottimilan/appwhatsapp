@@ -1,21 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './ChatWindow.css';
 
-const ChatWindow = ({ selectedChat, messages }) => {
+const ChatWindow = ({ selectedChat, messages, onSendMessage, loading }) => {
   const [inputMessage, setInputMessage] = useState('');
+  const messagesEndRef = useRef(null);
 
-  // Mensajes de ejemplo para el diseño inicial
-  const mockMessages = [
-    { id: 1, text: 'Hola, ¿cómo estás?', timestamp: '10:30', isOutgoing: false },
-    { id: 2, text: '¡Hola! Todo bien, gracias. ¿Y tú?', timestamp: '10:32', isOutgoing: true },
-    { id: 3, text: 'Muy bien, gracias por preguntar', timestamp: '10:33', isOutgoing: false },
-    { id: 4, text: '¿Necesitas algo en particular?', timestamp: '10:35', isOutgoing: true },
-  ];
+  // Auto-scroll al último mensaje
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const handleSendMessage = () => {
-    if (inputMessage.trim()) {
-      console.log('Enviando mensaje:', inputMessage);
-      // TODO: Implementar envío real
+    if (inputMessage.trim() && onSendMessage) {
+      onSendMessage(inputMessage);
       setInputMessage('');
     }
   };
@@ -56,19 +53,42 @@ const ChatWindow = ({ selectedChat, messages }) => {
       </div>
 
       <div className="messages-container">
-        <div className="messages-list">
-          {mockMessages.map((message) => (
-            <div
-              key={message.id}
-              className={`message ${message.isOutgoing ? 'outgoing' : 'incoming'}`}
-            >
-              <div className="message-bubble">
-                <div className="message-text">{message.text}</div>
-                <div className="message-time">{message.timestamp}</div>
+        {loading ? (
+          <div className="loading-state">
+            <div className="loading-spinner"></div>
+            <p>Cargando mensajes...</p>
+          </div>
+        ) : (
+          <div className="messages-list">
+            {messages.length === 0 ? (
+              <div className="empty-messages">
+                <p>No hay mensajes en esta conversación</p>
               </div>
-            </div>
-          ))}
-        </div>
+            ) : (
+              messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`message ${message.isOutgoing ? 'outgoing' : 'incoming'}`}
+                >
+                  <div className="message-bubble">
+                    <div className="message-text">{message.text}</div>
+                    <div className="message-time">
+                      {message.timestamp}
+                      {message.isOutgoing && (
+                        <span className="message-status">
+                          {message.status === 'sent' && '✓'}
+                          {message.status === 'delivered' && '✓✓'}
+                          {message.status === 'read' && '✓✓'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+        )}
       </div>
 
       <div className="message-input-container">
@@ -80,11 +100,12 @@ const ChatWindow = ({ selectedChat, messages }) => {
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
+            disabled={loading}
           />
           <button
             className="send-button"
             onClick={handleSendMessage}
-            disabled={!inputMessage.trim()}
+            disabled={!inputMessage.trim() || loading}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
